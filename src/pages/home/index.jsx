@@ -68,7 +68,7 @@ const HomePage = () => {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center">
               <Link href="/" className="flex-shrink-0">
-                <span className="text-2xl font-bold text-gray-900">Tripper</span>
+                <Image src="/logo.png" width={150} height={150} alt="" />
               </Link>
               <div className="flex items-baseline ml-10 space-x-4">
                 <Link
