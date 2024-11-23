@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import Link from "next/link";
 
 export default function Register() {
   const [name, setName] = useState(""); // State for name
@@ -192,9 +193,9 @@ export default function Register() {
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">
             Already have an account?{" "}
-            <a href="/login" className="text-blue-500 hover:text-blue-700">
+            <Link href="/login" className="text-blue-500 hover:text-blue-700">
               Login
-            </a>
+            </Link>
           </p>
         </div>
       </div>

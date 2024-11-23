@@ -25,7 +25,7 @@ const HomePage = () => {
     }
   }, []);
 
-  const fetchPromos = async () => {
+  const fetchPromos = useCallback(async () => {
     if (!token) return; // Prevent fetching promos if no login token
 
     try {
@@ -33,7 +33,7 @@ const HomePage = () => {
       const response = await axios.get("https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/promos", {
         headers: {
           Authorization: `Bearer ${token}`, // Use the token if available
-          apiKey, // Use the token if available
+          apiKey, // Use the apiKey if available
         },
       });
       console.log("Promos response:", response.data.data);
@@ -51,7 +51,7 @@ const HomePage = () => {
     } finally {
       setLoading(false); // Stop loading after the request
     }
-  };
+  }, [token, apiKey]); // Add token and apiKey as dependencies
 
   // Fetch promos after login state is set
   useEffect(() => {
@@ -59,7 +59,7 @@ const HomePage = () => {
       console.log("Fetching promos...");
       fetchPromos(); // Fetch promos only if login is successful and token is available
     }
-  }, [token]);
+  }, [token, fetchPromos]);
 
   return (
     <>
@@ -162,11 +162,6 @@ const HomePage = () => {
           <div className="grid gap-6 md:grid-cols-4">{/* Categories will go here */}</div>
         </div>
         <div className="space-y-8">
-          <div className="text-center">
-            <h2 className="mb-4 text-3xl font-bold">Latest Promos</h2>
-            <p className="max-w-2xl mx-auto text-gray-600">Grab unbeatable deals and save big on your next adventure</p>
-          </div>
-
           <div className="space-y-8">
             <div className="text-center">
               <h2 className="mb-4 text-3xl font-bold">Latest Promos</h2>

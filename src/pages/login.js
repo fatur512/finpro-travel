@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { login } from "../redux/authSlice";
 import { useRouter } from "next/router";
+import Link from "next/link";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -85,7 +86,7 @@ export default function Login() {
               className="w-full p-3 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          {error && <p className="text-sm text-red-500">{error}</p>} {/* Display error */}
+          {error && <p className="text-sm text-red-500">{error}</p>}
           <button
             type="submit"
             disabled={loading}
@@ -97,10 +98,10 @@ export default function Login() {
 
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">
-            Don't have an account?{" "}
-            <a href="/register" className="text-blue-500 hover:text-blue-700">
+            Dont have an account?{" "}
+            <Link href="/register" className="text-blue-500 hover:text-blue-700">
               Register
-            </a>
+            </Link>
           </p>
         </div>
       </div>
