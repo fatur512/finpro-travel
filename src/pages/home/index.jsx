@@ -11,6 +11,7 @@ const HomePage = () => {
   const [categories, setCategories] = useState([]); // State for categories
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [cartLoading, setCartLoading] = useState(false); // Track cart loading state
 
   useEffect(() => {
     // Get the token and apiKey from localStorage
@@ -38,7 +39,6 @@ const HomePage = () => {
         },
       });
 
-      // Check if the response is an array
       if (Array.isArray(response.data.data)) {
         setPromos(response.data.data); // Update state with the fetched data
       } else {
@@ -65,7 +65,6 @@ const HomePage = () => {
         },
       });
 
-      // Check if the response is an array
       if (Array.isArray(response.data.data)) {
         setCategories(response.data.data); // Update state with the fetched categories
       } else {
@@ -87,6 +86,40 @@ const HomePage = () => {
       fetchCategories(); // Fetch categories
     }
   }, [token, fetchPromos, fetchCategories]);
+
+  // Function to handle adding to the cart
+  const addToCart = async (categoryId) => {
+    if (!token) return;
+
+    setCartLoading(true); // Start loading for cart
+
+    try {
+      const response = await axios.post(
+        `https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/add-cart`,
+        {
+          categoryId, // The ID of the category being added to the cart
+          quantity: 1, // Set default quantity to 1, you can modify this if needed
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            apiKey,
+          },
+        }
+      );
+
+      if (response.data.success) {
+        alert("Item added to the cart!"); // Show success message
+      } else {
+        setError("Failed to add item to cart.");
+      }
+    } catch (err) {
+      setError("Error adding item to cart");
+      console.error("Error adding to cart:", err.response?.data || err.message);
+    } finally {
+      setCartLoading(false); // Stop loading for cart
+    }
+  };
 
   return (
     <>
@@ -210,6 +243,13 @@ const HomePage = () => {
                 <div className="p-4">
                   <h3 className="mb-2 text-xl font-semibold">{category.name}</h3>
                   <p className="text-gray-600">{category.description}</p>
+                  <button
+                    onClick={() => addToCart(category.id)}
+                    className="px-6 py-2 mt-4 text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                    disabled={cartLoading}
+                  >
+                    {cartLoading ? "Adding..." : "Add to Cart"}
+                  </button>
                 </div>
               </div>
             ))}
