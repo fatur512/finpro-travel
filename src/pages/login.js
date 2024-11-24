@@ -45,12 +45,11 @@ export default function Login() {
       localStorage.setItem("token", data.token);
       localStorage.setItem("apiKey", API_KEY);
 
-      // Redirect to the dashboard after successful login
       router.push("/home");
     } catch (err) {
-      setError(err.message); // Set error message if any
+      setError(err.message);
     } finally {
-      setLoading(false); // Reset loading state
+      setLoading(false);
     }
   };
 

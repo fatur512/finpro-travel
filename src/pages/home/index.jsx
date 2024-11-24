@@ -8,30 +8,29 @@ const HomePage = () => {
   const [apiKey, setApiKey] = useState(null);
   const [token, setToken] = useState(null);
   const [promos, setPromos] = useState([]);
-  const [categories, setCategories] = useState([]); // State for categories
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [cartLoading, setCartLoading] = useState(false); // Track cart loading state
+  const [cartLoading, setCartLoading] = useState(false);
 
   useEffect(() => {
-    // Get the token and apiKey from localStorage
     const savedToken = localStorage.getItem("token");
     const savedApiKey = localStorage.getItem("apiKey");
 
     if (savedToken) {
-      setToken(savedToken); // Set the token if it exists
-      setApiKey(savedApiKey); // Set the API key if it exists
+      setToken(savedToken);
+      setApiKey(savedApiKey);
     } else {
-      // Redirect to login if no token is found
       window.location.href = "/login";
     }
   }, []);
 
+  //API PROMO
   const fetchPromos = useCallback(async () => {
-    if (!token) return; // Prevent fetching promos if no login token
+    if (!token) return;
 
     try {
-      setLoading(true); // Start loading
+      setLoading(true);
       const response = await axios.get("https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/promos", {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -40,7 +39,7 @@ const HomePage = () => {
       });
 
       if (Array.isArray(response.data.data)) {
-        setPromos(response.data.data); // Update state with the fetched data
+        setPromos(response.data.data);
       } else {
         setError("Promotions data is not in the expected format.");
         console.error("Error: Response data is not an array");
@@ -49,15 +48,16 @@ const HomePage = () => {
       setError("Failed to load promotions");
       console.error("Error fetching promos:", err.response?.data || err.message);
     } finally {
-      setLoading(false); // Stop loading after the request
+      setLoading(false);
     }
   }, [token, apiKey]);
 
+  //API CATEGORIES
   const fetchCategories = useCallback(async () => {
-    if (!token) return; // Prevent fetching categories if no login token
+    if (!token) return;
 
     try {
-      setLoading(true); // Start loading
+      setLoading(true);
       const response = await axios.get("https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/categories", {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -66,7 +66,7 @@ const HomePage = () => {
       });
 
       if (Array.isArray(response.data.data)) {
-        setCategories(response.data.data); // Update state with the fetched categories
+        setCategories(response.data.data);
       } else {
         setError("Categories data is not in the expected format.");
         console.error("Error: Response data is not an array");
@@ -75,30 +75,28 @@ const HomePage = () => {
       setError("Failed to load categories");
       console.error("Error fetching categories:", err.response?.data || err.message);
     } finally {
-      setLoading(false); // Stop loading after the request
+      setLoading(false);
     }
   }, [token, apiKey]);
 
-  // Fetch promos and categories after login state is set
   useEffect(() => {
     if (token) {
-      fetchPromos(); // Fetch promos
-      fetchCategories(); // Fetch categories
+      fetchPromos();
+      fetchCategories();
     }
   }, [token, fetchPromos, fetchCategories]);
 
-  // Function to handle adding to the cart
   const addToCart = async (categoryId) => {
     if (!token) return;
 
-    setCartLoading(true); // Start loading for cart
+    setCartLoading(true);
 
     try {
       const response = await axios.post(
         `https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/add-cart`,
         {
-          categoryId, // The ID of the category being added to the cart
-          quantity: 1, // Set default quantity to 1, you can modify this if needed
+          categoryId,
+          quantity: 1,
         },
         {
           headers: {
@@ -109,7 +107,7 @@ const HomePage = () => {
       );
 
       if (response.data.success) {
-        alert("Item added to the cart!"); // Show success message
+        alert("Item added to the cart!");
       } else {
         setError("Failed to add item to cart.");
       }
@@ -117,7 +115,7 @@ const HomePage = () => {
       setError("Error adding item to cart");
       console.error("Error adding to cart:", err.response?.data || err.message);
     } finally {
-      setCartLoading(false); // Stop loading for cart
+      setCartLoading(false);
     }
   };
 
@@ -172,7 +170,7 @@ const HomePage = () => {
       <div className="relative flex items-center justify-center h-screen">
         <div className="absolute inset-0 z-0">
           <Image
-            src="/hero-background.jpg"
+            src="/hero.jpg"
             alt="Travel Background"
             layout="fill"
             objectFit="cover"
@@ -214,7 +212,7 @@ const HomePage = () => {
             </p>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-4">{/* Featured Destinations will go here */}</div>
+          <div className="grid gap-6 md:grid-cols-4">{}</div>
         </div>
 
         {/* Categories Section */}
