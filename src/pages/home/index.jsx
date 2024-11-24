@@ -8,17 +8,18 @@ const HomePage = () => {
   const [apiKey, setApiKey] = useState(null);
   const [token, setToken] = useState(null);
   const [promos, setPromos] = useState([]);
+  const [categories, setCategories] = useState([]); // State for categories
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Get the token from localStorage
+    // Get the token and apiKey from localStorage
     const savedToken = localStorage.getItem("token");
-    const apikey = localStorage.getItem("apiKey");
+    const savedApiKey = localStorage.getItem("apiKey");
 
     if (savedToken) {
       setToken(savedToken); // Set the token if it exists
-      setApiKey(apikey); // Set the token if it exists
+      setApiKey(savedApiKey); // Set the API key if it exists
     } else {
       // Redirect to login if no token is found
       window.location.href = "/login";
@@ -32,11 +33,10 @@ const HomePage = () => {
       setLoading(true); // Start loading
       const response = await axios.get("https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/promos", {
         headers: {
-          Authorization: `Bearer ${token}`, // Use the token if available
-          apiKey, // Use the apiKey if available
+          Authorization: `Bearer ${token}`,
+          apiKey,
         },
       });
-      console.log("Promos response:", response.data.data);
 
       // Check if the response is an array
       if (Array.isArray(response.data.data)) {
@@ -51,15 +51,42 @@ const HomePage = () => {
     } finally {
       setLoading(false); // Stop loading after the request
     }
-  }, [token, apiKey]); // Add token and apiKey as dependencies
+  }, [token, apiKey]);
 
-  // Fetch promos after login state is set
+  const fetchCategories = useCallback(async () => {
+    if (!token) return; // Prevent fetching categories if no login token
+
+    try {
+      setLoading(true); // Start loading
+      const response = await axios.get("https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/categories", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          apiKey,
+        },
+      });
+
+      // Check if the response is an array
+      if (Array.isArray(response.data.data)) {
+        setCategories(response.data.data); // Update state with the fetched categories
+      } else {
+        setError("Categories data is not in the expected format.");
+        console.error("Error: Response data is not an array");
+      }
+    } catch (err) {
+      setError("Failed to load categories");
+      console.error("Error fetching categories:", err.response?.data || err.message);
+    } finally {
+      setLoading(false); // Stop loading after the request
+    }
+  }, [token, apiKey]);
+
+  // Fetch promos and categories after login state is set
   useEffect(() => {
     if (token) {
-      console.log("Fetching promos...");
-      fetchPromos(); // Fetch promos only if login is successful and token is available
+      fetchPromos(); // Fetch promos
+      fetchCategories(); // Fetch categories
     }
-  }, [token, fetchPromos]);
+  }, [token, fetchPromos, fetchCategories]);
 
   return (
     <>
@@ -108,6 +135,7 @@ const HomePage = () => {
           </div>
         </div>
       </nav>
+
       <div className="relative flex items-center justify-center h-screen">
         <div className="absolute inset-0 z-0">
           <Image
@@ -142,7 +170,9 @@ const HomePage = () => {
           </div>
         </div>
       </div>
+
       <div className="container px-4 py-16 mx-auto space-y-16">
+        {/* Featured Destinations Section */}
         <div className="space-y-8">
           <div className="text-center">
             <h2 className="mb-4 text-3xl font-bold">Featured Destinations</h2>
@@ -153,55 +183,77 @@ const HomePage = () => {
 
           <div className="grid gap-6 md:grid-cols-4">{/* Featured Destinations will go here */}</div>
         </div>
+
+        {/* Categories Section */}
         <div className="space-y-8">
           <div className="text-center">
             <h2 className="mb-4 text-3xl font-bold">Popular Categories</h2>
             <p className="max-w-2xl mx-auto text-gray-600">Discover travel experiences tailored to your interests</p>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-4">{/* Categories will go here */}</div>
+          <div className="grid gap-6 md:grid-cols-4">
+            {categories.map((category) => (
+              <div
+                key={category.id}
+                className="overflow-hidden transition-all duration-300 bg-white shadow-lg rounded-xl hover:shadow-xl"
+              >
+                <div className="relative w-full h-48">
+                  <Image
+                    src={category.imageUrl}
+                    alt={category.name}
+                    layout="fill"
+                    objectFit="cover"
+                    quality={100}
+                    className="opacity-70"
+                  />
+                </div>
+                <div className="p-4">
+                  <h3 className="mb-2 text-xl font-semibold">{category.name}</h3>
+                  <p className="text-gray-600">{category.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="space-y-8">
-          <div className="space-y-8">
-            <div className="text-center">
-              <h2 className="mb-4 text-3xl font-bold">Latest Promos</h2>
-              <p className="max-w-2xl mx-auto text-gray-600">
-                Grab unbeatable deals and save big on your next adventure
-              </p>
-            </div>
 
-            <div className="grid gap-6 md:grid-cols-3">
-              {promos.map((promo) => (
-                <div
-                  key={promo.id}
-                  className="overflow-hidden transition-all duration-300 bg-white shadow-lg rounded-xl hover:shadow-xl"
-                >
-                  <div className="relative w-full h-48">
-                    <Image src={promo.imageUrl} alt={promo.title} fill className="object-cover" />
-                    <div className="absolute flex items-center gap-2 px-3 py-1 text-white bg-red-500 rounded-full top-4 right-4">
-                      <Tag size={16} />
-                      {promo.promo_discount_price}% OFF
-                    </div>
-                  </div>
-                  <div className="p-4">
-                    <h3 className="mb-2 text-xl font-semibold">{promo.title}</h3>
-                    <p className="mb-4 text-gray-600">{promo.description}</p>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-gray-500">
-                        <Clock size={16} />
-                        <span>Valid until: {promo.validUntil}</span>
-                      </div>
-                      <Link
-                        href={`/promos/${promo.id}`}
-                        className="px-4 py-2 text-white transition-colors bg-green-500 rounded-md hover:bg-green-600"
-                      >
-                        View Promo
-                      </Link>
-                    </div>
+        {/* Latest Promos Section */}
+        <div className="space-y-8">
+          <div className="text-center">
+            <h2 className="mb-4 text-3xl font-bold">Latest Promos</h2>
+            <p className="max-w-2xl mx-auto text-gray-600">Grab unbeatable deals and save big on your next adventure</p>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-3">
+            {promos.map((promo) => (
+              <div
+                key={promo.id}
+                className="overflow-hidden transition-all duration-300 bg-white shadow-lg rounded-xl hover:shadow-xl"
+              >
+                <div className="relative w-full h-48">
+                  <Image src={promo.imageUrl} alt={promo.title} fill className="object-cover" />
+                  <div className="absolute flex items-center gap-2 px-3 py-1 text-white bg-red-500 rounded-full top-4 right-4">
+                    <Tag size={16} />
+                    {promo.promo_discount_price}% OFF
                   </div>
                 </div>
-              ))}
-            </div>
+                <div className="p-4">
+                  <h3 className="mb-2 text-xl font-semibold">{promo.title}</h3>
+                  <p className="mb-4 text-gray-600">{promo.description}</p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-gray-500">
+                      <Clock size={16} />
+                      <span>Valid until: {promo.validUntil}</span>
+                    </div>
+                    <Link
+                      href={`/promos/${promo.id}`}
+                      className="px-4 py-2 text-white transition-colors bg-green-500 rounded-md hover:bg-green-600"
+                    >
+                      View Promo
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
